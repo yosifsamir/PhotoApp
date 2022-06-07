@@ -6,19 +6,24 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.paging.PagingData
 
 import com.example.photoapp.R
 import com.example.photoapp.adapter.UnsplashPhotoAdapter
 import com.example.photoapp.data.UnsplashPhoto
 import com.example.photoapp.databinding.FragmentGalleryBinding
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class GalleryFragment : Fragment(R.layout.fragment_gallery) {
+class GalleryFragment : Fragment(R.layout.fragment_gallery),
+    UnsplashPhotoAdapter.OnItemClickListener {
 
     private val viewModel by viewModels<GalleryViewModel>() // the GalleryViewModel will be injected by dagger.
     private var _binding:FragmentGalleryBinding ? =null
@@ -26,7 +31,7 @@ class GalleryFragment : Fragment(R.layout.fragment_gallery) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding=FragmentGalleryBinding.bind(view)
-        val adapter=UnsplashPhotoAdapter()
+        val adapter=UnsplashPhotoAdapter(this)
         binding.apply {
             galleryRecyclerView.setHasFixedSize(true)
             galleryRecyclerView.adapter=adapter
@@ -38,6 +43,21 @@ class GalleryFragment : Fragment(R.layout.fragment_gallery) {
             }
         })
         setHasOptionsMenu(true) // show option menu in fragment
+        adapter.addLoadStateListener {
+            binding.galleryProgressBar.isVisible=it.source.refresh is LoadState.Loading
+            binding.galleryRecyclerView.isVisible=it.source.refresh is LoadState.NotLoading
+            binding.retryBtn.isVisible=it.source.refresh is LoadState.Error
+            binding.errorTxt.isVisible=it.source.refresh is LoadState.Error
+
+            if(it.source.refresh is LoadState.NotLoading && it.append.endOfPaginationReached){
+                binding.galleryRecyclerView.isVisible=false
+                Snackbar.make(binding.root,"There is no data",Snackbar.LENGTH_LONG).show()
+            }
+        }
+
+        binding.retryBtn.setOnClickListener{
+            adapter.retry()  // don't use adapter.refresh()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -65,5 +85,10 @@ class GalleryFragment : Fragment(R.layout.fragment_gallery) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding=null
+    }
+
+    override fun onItemClick(photo: UnsplashPhoto) {
+        val action=GalleryFragmentDirections.actionGalleryFragmentToDetailsFragment(photo)
+        findNavController().navigate(action)
     }
 }

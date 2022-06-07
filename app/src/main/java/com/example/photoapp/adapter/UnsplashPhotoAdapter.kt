@@ -12,7 +12,7 @@ import com.example.photoapp.R
 import com.example.photoapp.data.UnsplashPhoto
 import com.example.photoapp.databinding.UnsplashLayoutBinding
 
-class UnsplashPhotoAdapter :
+class UnsplashPhotoAdapter(private val listener:OnItemClickListener) :
     PagingDataAdapter<UnsplashPhoto, UnsplashPhotoAdapter.UnsplashPhotoViewHolder>(PHOTO_COMPARATOR) {
 
 
@@ -28,7 +28,20 @@ class UnsplashPhotoAdapter :
         }
     }
 
-    class UnsplashPhotoViewHolder(private val binding:UnsplashLayoutBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class UnsplashPhotoViewHolder(private val binding:UnsplashLayoutBinding) : RecyclerView.ViewHolder(binding.root) {
+
+        init {
+            binding.root.setOnClickListener {
+                val position=bindingAdapterPosition
+                if (position!=RecyclerView.NO_POSITION){
+                    val item=getItem(position)
+                    if (item!=null){
+                        listener.onItemClick(item)
+                    }
+                }
+            }
+        }
+
         fun bind(unsplashPhoto: UnsplashPhoto){
             binding.apply {
                 Glide.with(itemView)
@@ -39,8 +52,13 @@ class UnsplashPhotoAdapter :
                     .into(unsplahImageView)
             }
         }
+
+
     }
 
+    interface OnItemClickListener{
+        fun onItemClick(photo:UnsplashPhoto)
+    }
     companion object{
         private val PHOTO_COMPARATOR= object : DiffUtil.ItemCallback<UnsplashPhoto>() {
             override fun areItemsTheSame(oldItem: UnsplashPhoto, newItem: UnsplashPhoto) = oldItem.id==newItem.id
