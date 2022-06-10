@@ -16,19 +16,19 @@ class UnsplashPagingSource(private val unsplashApi: UnsplashApi,private val quer
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UnsplashPhoto> {
        return try {
-           var posotion = params.key
-           if (posotion == null) posotion = 1
+           var position = params.key
+           if (position == null) position = 1
            val response = unsplashApi.searchPhotos(
                query,
-               page = posotion.toString(),
+               page = position.toString(),
                perPage = params.loadSize.toString()
            )
            val photos = response.results
            Log.d("ddd",query)
-           Log.d("ddd",posotion.toString())
+           Log.d("ddd",position.toString())
            Log.d("ddd",params.loadSize.toString())
-           LoadResult.Page(data=photos, prevKey = if(posotion==1) null else posotion-1,
-               nextKey = if(photos.isEmpty()) null else posotion+1
+           LoadResult.Page(data=photos, prevKey = if(position==1) null else position-1,
+               nextKey = if(photos.isEmpty()) null else position+1
            )
        }catch (exception : IOException){
            LoadResult.Error(exception)
