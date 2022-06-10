@@ -21,12 +21,4 @@ interface UnsplashApi {
                              ,@Query("page") page:String
                              ,@Query("per_page") perPage:String):UnsplashResponse
 
-
-    @Headers("Accept-version: v1",
-                     "Authorization: Client-ID $CLIENT_ID")
-    @GET("search/photos")
-    fun searchPhotosLive(@Query("query") query:String
-                             ,@Query("page") page:String
-                             ,@Query("per_page") perPage:String):Call<UnsplashResponse>
-
 }

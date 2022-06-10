@@ -25,18 +25,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-        unsplashApi.searchPhotosLive("cat","1","20").enqueue(object : Callback<UnsplashResponse> {
-            override fun onFailure(call: Call<UnsplashResponse>, t: Throwable) {
 
-            }
-
-            override fun onResponse(
-                call: Call<UnsplashResponse>,
-                response: Response<UnsplashResponse>
-            ) {
-                Log.d("ddd",response.body()!!.results.toString())
-            }
-
-        })
     }
 }
